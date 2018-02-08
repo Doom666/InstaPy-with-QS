@@ -1,6 +1,7 @@
 """Module which handles the follow features like unfollowing and following"""
 import json
 import csv
+from datetime import datetime
 from .time_util import sleep
 from .util import delete_line_from_file
 from .util import scroll_bottom
@@ -15,21 +16,39 @@ import random
 import os
 
 
-def set_automated_followed_pool(username, logger, logfolder):
+def set_automated_followed_pool(username, logger, logfolder, unfollow_after):
     automatedFollowedPool = []
     try:
         with open('{0}{1}_followedPool.csv'.format(logfolder, username), 'r+') as followedPoolFile:
             reader = csv.reader(followedPoolFile)
-            automatedFollowedPool = [row[0] for row in reader]
+            for row in reader:
+                if unfollow_after is not None:
+                    try:
+                        ftime = datetime.strptime(row[0].split(' ~ ')[0], '%Y-%m-%d %H:%M')
+                        realtimestamp = datetime.now().timestamp()
+                        if realtimestamp - ftime.timestamp() > unfollow_after:
+                            fword = row[0].split(' ~ ')[1]
+                            automatedFollowedPool.append(fword)
+                    except ValueError:
+                        fword = row[0]
+                        automatedFollowedPool.append(fword)
+                else:
+                    try:
+                        fword = row[0].split(' ~ ')[1]
+                    except IndexError:
+                        fword = row[0]
+                    automatedFollowedPool.append(fword)
 
-        logger.info("Number of people followed automatically remaining: {}"
+        logger.info("Number of users available to unfollow: {}"
                     .format(len(automatedFollowedPool)))
 
         followedPoolFile.close()
 
     except BaseException as e:
         logger.error("set_automated_followed_pool error {}".format(str(e)))
+        raise
 
+    print(automatedFollowedPool)
     return automatedFollowedPool
 
 
@@ -101,9 +120,9 @@ def unfollow(browser,
                     browser.get('https://www.instagram.com/' + person)
                     sleep(2)
                     follow_button = browser.find_element_by_xpath(
-                        "//*[contains(text(), 'Follow')]")
+                        "//*[contains(text(), 'Follow') or contains(text(), 'Requested')]")
 
-                    if follow_button.text == 'Following':
+                    if follow_button.text in ['Following', 'Requested']:
                         if quota_supervisor('unfollows') == 'jump':
                             jumped += 1
                             update_activity('jumps')
@@ -265,6 +284,7 @@ def unfollow(browser,
                     else:
                         unfollowNum += 1
                         click_element(browser, follow_button) # follow_button.click()
+                        update_activity('unfollows')
                         print('--> Ongoing Unfollow ' + str(unfollowNum) +
                               ', now unfollowing: {}'
                               .format(person.encode('utf-8')))
@@ -385,7 +405,9 @@ def follow_user(browser, follow_restrict, login, user_name, blacklist, logger, l
                 update_activity('follows')
 
             logger.info('--> Now following')
-            log_followed_pool(login, user_name, logger, logfolder)
+            logtime = datetime.now().strftime('%Y-%m-%d %H:%M')
+            log_followed_pool(login, user_name, logger, logfolder, logtime)
+
             follow_restrict[user_name] = follow_restrict.get(user_name, 0) + 1
             if blacklist['enabled'] is True:
                 action = 'followed'
@@ -407,9 +429,9 @@ def unfollow_user(browser, logger):
         return 0
     else:
         unfollow_button = browser.find_element_by_xpath(
-            "//*[contains(text(), 'Following')]")
+            "//*[contains(text(), 'Follow') or contains(text(), 'Requested')]")
 
-        if unfollow_button.text == 'Following':
+        if unfollow_button.text in ['Following', 'Requested']:
             click_element(browser, unfollow_button) # unfollow_button.send_keys("\n")
 
             update_activity('unfollows')
@@ -440,6 +462,9 @@ def follow_given_user(browser,
             click_element(browser, follow_button) # unfollow_button.send_keys("\n")
             update_activity('follows')
             logger.info('---> Now following: {}'.format(acc_to_follow))
+            logtime = datetime.now().strftime('%Y-%m-%d %H:%M')
+            log_followed_pool(login, person, logger, logfolder, logtime)
+
             follow_restrict[acc_to_follow] = follow_restrict.get(
                 acc_to_follow, 0) + 1
 
@@ -568,7 +593,8 @@ def follow_through_dialog(browser,
 
 
                     click_element(browser, button) # button.send_keys("\n")
-                    log_followed_pool(login, person, logger, logfolder)
+                    logtime = datetime.now().strftime('%Y-%m-%d %H:%M')
+                    log_followed_pool(login, person, logger, logfolder, logtime)
 
                     update_activity('follows')
 

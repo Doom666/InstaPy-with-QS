@@ -10,6 +10,7 @@ from time import sleep as real_sleep
 import time as epoch_time
 from plyer import notification
 import random
+from .settings import Settings
 
 
 def validate_username(browser,
@@ -48,7 +49,7 @@ def update_activity(action=None):
     """Record every Instagram server call (page load, content load, likes,
     comments, follows, unfollow)."""
 
-    conn = sqlite3.connect('./db/instapy.db')
+    conn = sqlite3.connect(Settings.database_location)
     with conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -131,10 +132,15 @@ def get_active_users(browser, username, posts, logger):
     active_users = []
 
     # posts argument is the number of posts to collect usernames
-    for count in range(1, posts):
+    for count in range(0, posts):
         try:
+            likes_count = formatNumber(browser.find_element_by_xpath(
+                "//a[contains(@class, '_nzn1h')]/span").text)/4*2
             browser.find_element_by_xpath(
                 "//a[contains(@class, '_nzn1h')]").click()
+            dialog = browser.find_element_by_xpath(
+                "//div[text()='Likes']/following-sibling::div")
+            scroll_bottom(browser, dialog, likes_count)
             sleep(1)
             tmp_list = browser.find_elements_by_xpath(
                 "//a[contains(@class, '_2g7d5')]")
@@ -175,7 +181,7 @@ def delete_line_from_file(filepath, lineToDelete, logger):
 
         for line in lines:
 
-            if line != lineToDelete:
+            if not line.endswith(lineToDelete):
                 f.write(line)
         f.close()
     except BaseException as e:
@@ -203,17 +209,17 @@ def scroll_bottom(browser, element, range_int):
 
 # I'm guessing all three have their advantages/disadvantages
 # Before committing over this code, you MUST justify your change
-# and potentially adding an 'if' statement that applies to your 
+# and potentially adding an 'if' statement that applies to your
 # specific case. See the following issue for more details
 # https://github.com/timgrossmann/InstaPy/issues/1232
 def click_element(browser, element, tryNum=0):
     # explaination of the following recursive function:
     #   we will attempt to click the element given, if an error is thrown
-    #   we know something is wrong (element not in view, element doesn't 
-    #   exist, ...). on each attempt try and move the screen around in 
+    #   we know something is wrong (element not in view, element doesn't
+    #   exist, ...). on each attempt try and move the screen around in
     #   various ways. if all else fails, programmically click the button
     #   using `execute_script` in the browser.
-    
+
     try:
         # use Selenium's built in click function
         element.click()
@@ -235,7 +241,7 @@ def click_element(browser, element, tryNum=0):
             # print("attempting last ditch effort for click, `execute_script`")
             browser.execute_script("document.getElementsByClassName('" +  element.get_attribute("class") + "')[0].click()")
             return # end condition for the recursive function
-            
+
 
         # sleep for 1 second to allow window to adjust (may or may not be needed)
         sleep_actual(1)
@@ -244,7 +250,7 @@ def click_element(browser, element, tryNum=0):
 
         # try again!
         click_element(browser, element, tryNum)
-    
+
 
 def formatNumber(number):
     formattedNum = number.replace(',', '').replace('.', '')
@@ -253,7 +259,7 @@ def formatNumber(number):
 
 
 def quota_supervisor(inspect):
-    conn = sqlite3.connect('./db/instapy.db')   #check Quota Supervisor's state (overall execution time takes less than a second: 2 rows & 17 columns)
+    conn = sqlite3.connect(Settings.database_location)   #check Quota Supervisor's state (overall execution time takes less than a second: 2 rows & 17 columns)
     with conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -476,7 +482,7 @@ def quota_supervisor_stochastic (protostoch, record_time):
     if ((stochastic_realtime - stochastic_latesttime_h) >= 3750 or
         (stochastic_realtime - stochastic_latesttime_d) >= 27144
         ):
-        conn = sqlite3.connect('./db/instapy.db')
+        conn = sqlite3.connect(Settings.database_location)
         with conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()

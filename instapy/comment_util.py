@@ -15,6 +15,7 @@ def get_comment_input(browser):
     if len(comment_input) <= 0:
         comment_input = browser.find_elements_by_xpath(
             '//input[@placeholder = "Add a comment…"]')
+            
     return comment_input
 
 
@@ -24,10 +25,11 @@ def open_comment_section(browser):
         ' May cause issues with browser windows of smaller widths')
     comment_elem = browser.find_elements_by_xpath(
         "//a[@role='button']/span[text()='Comment']/..")
+        
     if len(comment_elem) > 0:
         try:
             browser.execute_script(
-                "arguments[0].click();", comment_elem[0])
+                "arguments[0].click();", comment_elem[0])   #in some systems it may not be able to use click() function for clicking, using alternative click methods can help (e.g. thing.dispatchEvent(new MouseEvent('click')) or send_keys("\n"))
         except WebDriverException:
             print(missing_comment_elem_warning)
     else:
@@ -46,7 +48,7 @@ def comment_image(browser, username, comments, blacklist, logger, logfolder):
 
         open_comment_section(browser)
         comment_input = get_comment_input(browser)
-
+        
         if len(comment_input) > 0:
             comment_input[0].clear()
             comment_input = get_comment_input(browser)
@@ -64,11 +66,11 @@ def comment_image(browser, username, comments, blacklist, logger, logfolder):
                 add_user_to_blacklist(
                     browser, username, blacklist['campaign'], action, logger, logfolder
                 )
+            logger.info("--> Commented: {}".format(rand_comment.encode('utf-8')))
         else:
             logger.warning('--> Warning: Comment Action Likely Failed:'
                            ' Comment Element not found')
 
-        logger.info("--> Commented: {}".format(rand_comment.encode('utf-8')))
         sleep(2)
 
         return 1

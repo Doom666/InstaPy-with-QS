@@ -5,6 +5,7 @@ import random
 from math import ceil
 from re import findall
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
 
 from .time_util import sleep
 from .util import update_activity
@@ -183,54 +184,52 @@ def get_links_for_tag(browser,
     sleep(2)
 
     abort = True
-    try:
-        load_button = body_elem.find_element_by_xpath(
-            '//a[contains(@class, "_1cr2e _epyes")]')
-    except:
-        try:
-            # scroll down to load posts
-            for i in range(int(ceil(amount/12))):
-                browser.execute_script(
-                    "window.scrollTo(0, document.body.scrollHeight);")
-                sleep(2)
-        except:
-            logger.warning(
-                'Load button not found, working with current images!')
-        else:
-            abort = False
-            body_elem.send_keys(Keys.END)
-            sleep(2)
-            # update server calls
-            update_activity()
-    else:
-        abort = False
-        body_elem.send_keys(Keys.END)
-        sleep(2)
-        click_element(browser, load_button) # load_button.click()
-        # update server calls
-        update_activity()
-
-    body_elem.send_keys(Keys.HOME)
-    sleep(1)
 
     # Get links
     if skip_top_posts:
         main_elem = browser.find_element_by_xpath('//main/article/div[2]')
     else:
         main_elem = browser.find_element_by_tag_name('main')
-
-    link_elems = main_elem.find_elements_by_tag_name('a')
-    total_links = len(link_elems)
+    total_links = 0
     links = []
     filtered_links = 0
-    try:
-        if link_elems:
-            links = [link_elem.get_attribute('href') for link_elem in link_elems
-                     if link_elem and link_elem.text in media]
-            filtered_links = len(links)
+    default_load = 21 if not skip_top_posts else 12   # !mistake change to `if not skip_top_posts`   
+    #21 links with top posts (21/3=7 total rows)   #12 (12/3=4 low rows, 3 top rows) links without top posts
+    while filtered_links < amount:
+        if amount >= default_load:  # if amount is less to be fit in a default screen, don't scroll
+            if filtered_links >= default_load:   #grab already loaded pics by default
+                for i in range(5):
+                    browser.execute_script(
+                        "window.scrollTo(0, document.body.scrollHeight);")   #scroll 12 times to get fresh a 36 pic links in it #changed range 14 cos not loading enough pics
+                    update_activity()
+                    sleep(1)   #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
+        link_elems = main_elem.find_elements_by_tag_name('a')
+        total_links =+ len(link_elems)
 
-    except BaseException as e:
-        logger.error("link_elems error {}".format(str(e)))
+        try:
+            if link_elems:
+                new_links = [link_elem.get_attribute('href') for link_elem in link_elems
+                         if link_elem and link_elem.text in media]
+                for new_link in new_links:
+                    links.append(new_link)
+                links =  list(set(links))   #delete duplicated links
+                if len(links) == filtered_links:
+                    logger.info("This tag has less pictures than intended..")
+                    break
+                else:
+                    filtered_links =+ len(links)
+                if filtered_links < default_load and amount > filtered_links:
+                    logger.info("This tag has so less pictures than expected...")
+                    break
+            else:
+                logger.warning("This tag does not contain a picture")
+                break
+
+        except BaseException as e:
+            logger.error("link_elems error {}".format(str(e)))
+            break
+
+    print("\n\n{} links currently : {}\n\n".format(len(links), links))
 
     while (filtered_links < amount) and not abort:
         amount_left = amount - filtered_links
@@ -264,7 +263,32 @@ def get_links_for_tag(browser,
         links = [link_elem.get_attribute('href') for link_elem in link_elems
                  if link_elem.text in media]
         filtered_links = len(links)
-
+    
+    #it keeps maximum 15 entries (minimum 9 seen) in image links of " a/'href' " location
+    #with one END key press it opens average of 3 (sometimes 4 or 1 or 2 entries opens, also 5 entries did open...) new entries(in other words 3 rows) and each containing three images
+    # so, to get fresh new links of pictures we must scroll 15/3 = 5 times in order to get fresh list... 
+    #  and knowing that, each fresh list will contain at least 9*3 = 27 pictures and max of 15*3 = 45 pictures, since we don't care of time spent to scrolling but reliability, we should choose min of 27 pics per one scroll . so 5 scrolls gets us 27 pics 50 scrolls  = 270 ... (maybe we can take average of 36 (12*3) pics that makes average of 360 pics per 50 scrolls)
+    # so we are going to get links after one fresh page scroll of 5 scrolls ..
+    #scroll_bottom(amount=5)
+    #get_links
+    #scroll_bottom(amount5) again..
+    #get_links..
+    #it is getting the current page's layout and picks 15 rows of pics to put in it's " a/'href' " so it is live result, we must skip jumping to HOME after scrolling down, and must stay at the END of the page to pick the results....
+    # okay the plan is taking top 12 row pic links, scrolling to get next average of 12 rows and getting pic links, then scrolling..
+    #  result is 12*3 + 12*3 = 72 pics 
+    #  amomunt = 200 pics
+    #  we must scroll according to the amount .  . 
+    #   gathered_links = 0
+    #   while gathered_links < amount:
+    #    for i in 12:
+    #        scroll_bottom with window.scrollTo(0, document.body.scrollHeight);
+    #        sleep(1)
+    #    get_links
+    #    gathered_links += 12*3
+    #it must sleep one second before scrolling with 
+    # window.scrollTo(0, document.body.scrollHeight);
+    #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
+    
     return links[:amount]
 
 
@@ -413,8 +437,19 @@ def check_link(browser,
     sleep(2)
 
     """Check if the Post is Valid/Exists"""
-    post_page = browser.execute_script(
-        "return window._sharedData.entry_data.PostPage")
+    try:
+        post_page = browser.execute_script(
+            "return window._sharedData.entry_data.PostPage")
+    except WebDriverException:   #selenium Exception
+        try:
+            #refresh page (you would refresh twice (or more), too)
+            #browser.get(link)  #method 1, when page is not loaded properly, it is not expected to reload. must be navigated to first
+            browser.execute_script("location.reload()")   #mehod 2, page loaded properly, can be reloaded
+            post_page = browser.execute_script(
+                "return window._sharedData.entry_data.PostPage")
+        except WebDriverException:
+            post_page = None
+    
     if post_page is None:
         logger.warning('Unavailable Page: {}'.format(link.encode('utf-8')))
         return True, None, None, 'Unavailable Page'
@@ -480,9 +515,20 @@ def check_link(browser,
         # update server calls
         update_activity()
         sleep(1)
-        num_followers = browser.execute_script(
-            "return window._sharedData.entry_data."
-            "ProfilePage[0].user.followed_by.count")
+        try:
+            num_followers = browser.execute_script(
+                "return window._sharedData.entry_data."
+                "ProfilePage[0].user.followed_by.count")
+        except WebDriverException:
+            try:
+                browser.execute_script("location.reload()")
+                num_followers = browser.execute_script(
+                    "return window._sharedData.entry_data."
+                    "ProfilePage[0].user.followed_by.count")
+            except WebDriverException:
+                num_followers = 'undefined'
+                like_by_followers_lower_limit = None
+                like_by_followers_upper_limit = None
         browser.get(link)
         # update server calls
         update_activity()
@@ -523,8 +569,16 @@ def check_link(browser,
                 "#[\d\w]*" + dont_likes + "[\d\w]*([^\d\w]|$)")
 
     for dont_likes_regex in dont_like_regex:
-        if re.search(dont_likes_regex, image_text, re.IGNORECASE):
-            return True, user_name, is_video, 'Inappropriate'
+        quash = re.search(dont_likes_regex, image_text, re.IGNORECASE)
+        if quash:
+            quashed = (((quash.group(0)).split('#')[1]).split(' ')[0]).split('\n')[0]   # dismiss possible space and newlines
+            iffy = ((re.split(r'\W+', dont_likes_regex))[3] if dont_likes_regex.endswith('*([^\\d\\w]|$)') else   # 'word' without format
+                     (re.split(r'\W+', dont_likes_regex))[1] if dont_likes_regex.endswith('+([^\\d\\w]|$)') else   # '[word'
+                      (re.split(r'\W+', dont_likes_regex))[3] if dont_likes_regex.startswith('#[\\d\\w]+') else     # ']word'
+                       (re.split(r'\W+', dont_likes_regex))[1])                                                    # '#word'
+            inapp_unit = ('Inappropriate! ~ contains \'{}\''.format(quashed.encode('utf-8')) if quashed == iffy else
+                              'Inappropriate! ~ contains \'{}\' in \'{}\''.format(iffy.encode('utf-8'), quashed.encode('utf-8')))
+            return True, user_name, is_video, inapp_unit
 
     return False, user_name, is_video, 'None'
 

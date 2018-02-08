@@ -16,9 +16,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import DesiredCapabilities
 import requests
 import sqlite3
+from subprocess import call as duplicate_it
 
-if os.name != 'nt':
-    from .clarifai_util import check_image
+#if os.name == 'nt':
+from .clarifai_util import check_image
+from .settings import Settings 
 from .comment_util import comment_image
 from .like_util import check_link
 from .like_util import get_links_for_tag
@@ -97,6 +99,13 @@ class InstaPy:
         self.video_comments = []
 
         self.followed = 0
+        self.liked_img = 0 
+        self.already_liked = 0 
+        self.inap_img = 0 
+        self.commented = 0 
+        self.followed_by = 0 
+        self.unfollowNumber = 0
+        
         self.follow_restrict = load_follow_restriction(self.logfolder)
         self.follow_times = 1
         self.do_follow = False
@@ -200,7 +209,7 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            chromedriver_location = './assets/chromedriver'
+            chromedriver_location = Settings.browser_location 
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
@@ -211,6 +220,7 @@ class InstaPy:
             # GUI-less browser. chromedriver 2.9 and above required
             if self.headless_browser:
                 chrome_options.add_argument('--headless')
+                chrome_options.add_argument('--blink-settings=imagesEnabled=false')
                 # Replaces browser User Agent from "HeadlessChrome".
                 user_agent = "Chrome"
                 chrome_options.add_argument('user-agent={user_agent}'
@@ -263,7 +273,7 @@ class InstaPy:
         else:
             self.logger.info('Logged in successfully!')
 
-        log_follower_num(self.browser, self.username, self.logfolder)
+        self.followed_by = log_follower_num(self.browser, self.username, self.logfolder)
 
         return self
 
@@ -669,6 +679,10 @@ class InstaPy:
         self.logger.info('Followed: {}'.format(followed))
 
         self.followed += followed
+        self.liked_img += liked_img 
+        self.already_liked += already_liked 
+        self.inap_img += inap_img 
+        self.commented += commented
 
         return self
 
@@ -698,7 +712,7 @@ class InstaPy:
         tags = [tag.strip() for tag in tags]
 
         tags = tags or []
-
+        
         for index, tag in enumerate(tags):
             self.logger.info('Tag [{}/{}]'.format(index + 1, len(tags)))
             self.logger.info('--> {}'.format(tag.encode('utf-8')))
@@ -713,11 +727,11 @@ class InstaPy:
             except NoSuchElementException:
                 self.logger.error('Too few images, skipping this tag')
                 continue
-
+            
             for i, link in enumerate(links):
                 self.logger.info('[{}/{}]'.format(i + 1, len(links)))
                 self.logger.info(link)
-
+                
                 try:
                     inappropriate, user_name, is_video, reason = (
                         check_link(self.browser,
@@ -873,6 +887,10 @@ class InstaPy:
         self.logger.info('Followed: {}'.format(followed))
 
         self.followed += followed
+        self.liked_img += liked_img 
+        self.already_liked += already_liked 
+        self.inap_img += inap_img 
+        self.commented += commented
 
         return self
 
@@ -971,7 +989,8 @@ class InstaPy:
                         liked = like_image(self.browser,
                                            user_name,
                                            self.blacklist,
-                                           self.logger)
+                                           self.logger,
+                                           self.logfolder)
 
                         if liked == True:
                             total_liked_img += 1
@@ -1039,6 +1058,11 @@ class InstaPy:
         self.logger.info('Inappropriate: {}'.format(inap_img))
         self.logger.info('Commented: {}'.format(commented))
 
+        self.liked_img += liked_img 
+        self.already_liked += already_liked 
+        self.inap_img += inap_img 
+        self.commented += commented
+        
         return self
 
     def interact_by_users(self,
@@ -1207,6 +1231,11 @@ class InstaPy:
         self.logger.info('Inappropriate: {}'.format(inap_img))
         self.logger.info('Commented: {}'.format(commented))
 
+        self.liked_img += liked_img
+        self.already_liked += already_liked
+        self.inap_img += inap_img
+        self.commented += commented
+        
         return self
 
     def like_from_image(self, url, amount=50, media=None):
@@ -1412,11 +1441,14 @@ class InstaPy:
                        onlyInstapyFollowed=False,
                        onlyInstapyMethod='FIFO',
                        sleep_delay=600,
-                       onlyNotFollowMe=False):
+                       onlyNotFollowMe=False,
+                       unfollow_after=None):
         """Unfollows (default) 10 users from your following list"""
-        self.automatedFollowedPool = set_automated_followed_pool(self.username,
-                                                                 self.logger,
-                                                                 self.logfolder)
+        if onlyInstapyFollowed == True:
+            self.automatedFollowedPool = set_automated_followed_pool(self.username,
+                                                                     self.logger,
+                                                                     self.logfolder,
+                                                                     unfollow_after)
 
         try:
             unfollowNumber = unfollow(self.browser,
@@ -1432,6 +1464,7 @@ class InstaPy:
                                       self.logfolder)
             self.logger.info(
                 "--> Total people unfollowed : {} ".format(unfollowNumber))
+            self.unfollowNumber += unfollowNumber
 
         except (TypeError, RuntimeWarning) as err:
             if isinstance(err, RuntimeWarning):
@@ -1675,6 +1708,10 @@ class InstaPy:
         self.logger.info('Randomly Skipped: {}'.format(skipped_img))
 
         self.followed += followed
+        self.liked_img += liked_img
+        self.already_liked += already_liked
+        self.inap_img += inap_img
+        self.commented += commented
 
         return self
 
@@ -1804,6 +1841,7 @@ class InstaPy:
         self.logger.info('Followed: {}'.format(followed))
 
         self.followed += followed
+        self.inap_img += inap_img
 
         return self
 
@@ -1814,11 +1852,35 @@ class InstaPy:
                                  peak_unfollows=(None, None),
                                   peak_server_calls=(None, None)):
 
-        conn = sqlite3.connect('./db/instapy.db')
+        #get the user specific DB file
+        cur_DB = Settings.database_location
+        splitter_slash = '/' if '/' in cur_DB else '\\'
+        cur_DB_name = cur_DB.split(splitter_slash)[-1]
+        owner_DB_name = 'instapy_{}.db'.format(self.username)
+        new_user = None
+        if cur_DB_name != owner_DB_name:
+            copy_command = 'copy' if os.name == 'nt' else 'cp'
+            cur_DB_link = cur_DB.replace(cur_DB_name, "")
+            cur_DB = cur_DB.replace('/', '\\') if os.name == 'nt' else cur_DB.replace('\\', '/')   #use Window & Unix specific slash for subprocess `copy`
+            cur_DB_dir = cur_DB_link.replace('/', '\\') if os.name == 'nt' else cur_DB_link.replace('\\', '/')
+            owner_DB = cur_DB_dir+owner_DB_name
+            #check if the user owns a DB, if not make a new one
+            if not os.path.isfile(owner_DB):
+                self.logger.info("Generating a database for `{}` ...".format(self.username))
+                duplicate_it('{} {} {}'.format(copy_command, cur_DB, owner_DB), shell=True)
+                new_user = True
+            Settings.database_location = owner_DB
+        
+        conn = sqlite3.connect(Settings.database_location)
         with conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
                 #reset supervisor's latest tact's state in each set_quota_supervisor initialization where it will treat as it is stated in the 'enabled' arg. later on
+            if new_user ==True:   #clean rows from a duplicated DB for new user
+                cur.execute("DELETE FROM statistics WHERE ROWID IN (SELECT ROWID FROM statistics ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
+                cur.execute("DELETE FROM QuotaPeaks WHERE ROWID IN (SELECT ROWID FROM QuotaPeaks ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
+                conn.commit()
+            
             supervising_state = None
             tact_cycle = 1
             record_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
