@@ -262,31 +262,6 @@ def get_links_for_tag(browser,
                  if link_elem.text in media]
         filtered_links = len(links)
     
-    #it keeps maximum 15 entries (minimum 9 seen) in image links of " a/'href' " location
-    #with one END key press it opens average of 3 (sometimes 4 or 1 or 2 entries opens, also 5 entries did open...) new entries(in other words 3 rows) and each containing three images
-    # so, to get fresh new links of pictures we must scroll 15/3 = 5 times in order to get fresh list... 
-    #  and knowing that, each fresh list will contain at least 9*3 = 27 pictures and max of 15*3 = 45 pictures, since we don't care of time spent to scrolling but reliability, we should choose min of 27 pics per one scroll . so 5 scrolls gets us 27 pics 50 scrolls  = 270 ... (maybe we can take average of 36 (12*3) pics that makes average of 360 pics per 50 scrolls)
-    # so we are going to get links after one fresh page scroll of 5 scrolls ..
-    #scroll_bottom(amount=5)
-    #get_links
-    #scroll_bottom(amount5) again..
-    #get_links..
-    #it is getting the current page's layout and picks 15 rows of pics to put in it's " a/'href' " so it is live result, we must skip jumping to HOME after scrolling down, and must stay at the END of the page to pick the results....
-    # okay the plan is taking top 12 row pic links, scrolling to get next average of 12 rows and getting pic links, then scrolling..
-    #  result is 12*3 + 12*3 = 72 pics 
-    #  amomunt = 200 pics
-    #  we must scroll according to the amount .  . 
-    #   gathered_links = 0
-    #   while gathered_links < amount:
-    #    for i in 12:
-    #        scroll_bottom with window.scrollTo(0, document.body.scrollHeight);
-    #        sleep(1)
-    #    get_links
-    #    gathered_links += 12*3
-    #it must sleep one second before scrolling with 
-    # window.scrollTo(0, document.body.scrollHeight);
-    #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
-    
     return links[:amount]
 
 
