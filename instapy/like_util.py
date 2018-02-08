@@ -229,8 +229,6 @@ def get_links_for_tag(browser,
             logger.error("link_elems error {}".format(str(e)))
             break
 
-    print("\n\n{} links currently : {}\n\n".format(len(links), links))
-
     while (filtered_links < amount) and not abort:
         amount_left = amount - filtered_links
         # Average items of the right media per page loaded
