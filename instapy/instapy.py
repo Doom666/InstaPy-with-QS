@@ -1876,7 +1876,7 @@ class InstaPy:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
                 #reset supervisor's latest tact's state in each set_quota_supervisor initialization where it will treat as it is stated in the 'enabled' arg. later on
-            if new_user ==True:   #clean rows from a duplicated DB for new user
+            if new_user == True :   #clean rows from a duplicated DB for new user
                 cur.execute("DELETE FROM statistics WHERE ROWID IN (SELECT ROWID FROM statistics ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
                 cur.execute("DELETE FROM QuotaPeaks WHERE ROWID IN (SELECT ROWID FROM QuotaPeaks ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
                 conn.commit()

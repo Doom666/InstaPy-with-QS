@@ -1,7 +1,7 @@
 """Module which handles the follow features like unfollowing and following"""
 import json
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from .time_util import sleep
 from .util import delete_line_from_file
 from .util import scroll_bottom
@@ -25,8 +25,9 @@ def set_automated_followed_pool(username, logger, logfolder, unfollow_after):
                 if unfollow_after is not None:
                     try:
                         ftime = datetime.strptime(row[0].split(' ~ ')[0], '%Y-%m-%d %H:%M')
-                        realtimestamp = datetime.now().timestamp()
-                        if realtimestamp - ftime.timestamp() > unfollow_after:
+                        ftimestamp = (ftime - datetime(1970, 1, 1)).total_seconds()
+                        realtimestamp = (datetime.now() - datetime(1970, 1, 1)).total_seconds()
+                        if realtimestamp - ftimestamp > unfollow_after:
                             fword = row[0].split(' ~ ')[1]
                             automatedFollowedPool.append(fword)
                     except ValueError:
@@ -48,7 +49,6 @@ def set_automated_followed_pool(username, logger, logfolder, unfollow_after):
         logger.error("set_automated_followed_pool error {}".format(str(e)))
         raise
 
-    print(automatedFollowedPool)
     return automatedFollowedPool
 
 
