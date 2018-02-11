@@ -11,6 +11,8 @@ from .util import add_user_to_blacklist
 from .util import quota_supervisor
 from .util import click_element
 from .print_log_writer import log_followed_pool
+from .print_log_writer import log_uncertain_unfollowed_pool 
+from .print_log_writer import log_record_all_unfollowed 
 from selenium.common.exceptions import NoSuchElementException
 import random
 import os
@@ -128,27 +130,44 @@ def unfollow(browser,
                             update_activity('jumps')
                             continue
                         else:
-                            unfollowNum += 1
+                            # click the button
                             click_element(browser, follow_button) # follow_button.click()
+                            sleep(4)
 
-                            update_activity('unfollows')
+                            # double check not following
+                            follow_button = browser.find_element_by_xpath(
+                                "//*[contains(text(), 'Follow')]")
 
-                            delete_line_from_file('{0}{1}_followedPool.csv'.format(logfolder, username), person +
+                            if follow_button.text == 'Follow':
+
+                                unfollowNum += 1
+                                update_activity('unfollows')
+
+                                delete_line_from_file('{0}{1}_followedPool.csv'.format(logfolder, username), person +
                                                   ",\n", logger)
 
-                            logger.info(
-                                '--> Ongoing Unfollow From InstaPy {},'
-                                ' now unfollowing: {}'
-                                .format(str(unfollowNum), person.encode('utf-8')))
+                                logger.info(
+                                    '--> Ongoing Unfollow From InstaPy {},'
+                                    ' now unfollowing: {}'
+                                    .format(str(unfollowNum), person.encode('utf-8')))
 
-                            sleep(15)
+                                sleep(15)
 
-                            if hasSlept:
-                                hasSlept = False
-                            continue
+                                if hasSlept:
+                                    hasSlept = False
+                                continue
+                            else:
+                                logger.error("unfollow error username {} might be blocked ".format(username))
+                                # stop the loop
+                                break
                     else:
+						# this user found in our list of unfollow but is not followed
+                        if follow_button.text != 'Follow':
+                            log_uncertain_unfollowed_pool(username, person, logger)
                         delete_line_from_file('{0}{1}_followedPool.csv'.format(logfolder, username),
                                               person + ",\n", logger)
+                        # save any unfollowed person
+                        log_record_all_unfollowed(username, person, logger)
 
                         logger.warning(
                             '--> Cannot Unfollow From InstaPy {}'

@@ -200,7 +200,7 @@ def get_links_for_tag(browser,
             if filtered_links >= default_load:   #grab already loaded pics by default
                 for i in range(5):
                     browser.execute_script(
-                        "window.scrollTo(0, document.body.scrollHeight);")   #scroll 12 times to get fresh a 36 pic links in it #changed range 14 cos not loading enough pics
+                        "window.scrollTo(0, document.body.scrollHeight);")   #scroll 5 times to get fresh a 5*3=15 pic links in it
                     update_activity()
                     sleep(1)   #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
         link_elems = main_elem.find_elements_by_tag_name('a')
@@ -562,33 +562,39 @@ def like_image(browser, username, blacklist, logger, logfolder):
         update_activity('jumps')
         return 'jumped'
     else:
+        """Likes the browser opened image"""
         like_elem = browser.find_elements_by_xpath(
             "//a[@role='button']/span[text()='Like']/..")
-        liked_elem = browser.find_elements_by_xpath(
-            "//a[@role='button']/span[text()='Unlike']")
-
         if len(like_elem) == 1:
             # sleep real quick right before clicking the element
             sleep(2)
             click_element(browser, like_elem[0])
-
-            logger.info('--> Image Liked!')
-            update_activity('likes')
-            if blacklist['enabled'] is True:
-                action = 'liked'
-                add_user_to_blacklist(
-                    browser, username, blacklist['campaign'], action, logger, logfolder
-                )
-            sleep(2)
-            return True
-        elif len(liked_elem) == 1:
-            logger.info('--> Already Liked!')
-            return False
+            # check now we have unlike instead of like
+            liked_elem = browser.find_elements_by_xpath(
+                "//a[@role='button']/span[text()='Unlike']")
+            if len(liked_elem) == 1:
+                logger.info('--> Image Liked!')
+                update_activity('likes')
+                if blacklist['enabled'] is True:
+                    action = 'liked'
+                    add_user_to_blacklist(
+                        browser, username, blacklist['campaign'], action, logger, logfolder
+                    )
+                sleep(2)
+                return True
+            else:
+                # if like not seceded wait for 2 min
+                logger.info('--> Image was not able to get Liked! maybe blocked ?')
+                sleep(120)
         else:
-            logger.info('--> Invalid Like Element!')
-            return False
+            liked_elem = browser.find_elements_by_xpath(
+                "//a[@role='button']/span[text()='Unlike']")
+            if len(liked_elem) == 1:
+                logger.info('--> Image already liked! ')
+                return False
 
-
+        logger.info('--> Invalid Like Element!')
+        return False
 
 
 
