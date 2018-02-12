@@ -217,7 +217,14 @@ def get_links_for_tag(browser,
                          if link_elem and link_elem.text in media]
                 for new_link in new_links:
                     links.append(new_link)
-                links =  list(set(links))   #delete duplicated links
+                
+                links_all = links   #uniqify links while preserving order
+                s = set()
+                links = []
+                for i in links_all:
+                    if i not in s:
+                        s.add(i)
+                        links.append(i)
                 
                 if len(links) == filtered_links:
                     try_again += 1
