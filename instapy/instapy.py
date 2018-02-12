@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 import time
 from sys import maxsize
+import platform
 import random
 
 from pyvirtualdisplay import Display
@@ -148,6 +149,11 @@ class InstaPy:
             error_msg = ('Sorry, Record Activity is not working on Windows. '
                          'We\'re working to fix this soon!')
             self.logger.warning(error_msg)
+        
+        if platform.python_version().startswith('3'):
+            self.bye_b = slice(2, -1)   #equialent to 'somewords'[2:-1]
+        else:
+            self.bye_b = slice(None, None)   #equialent to 'somewords'[:]
 
     def get_instapy_logger(self, show_logs):
         """
@@ -215,6 +221,8 @@ class InstaPy:
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--lang=en-US')
             chrome_options.add_argument('--disable-setuid-sandbox')
+            
+            #chrome_options.binary_location = 'C:\\Users\\shahr\\AppData\\Local\\Google\\Chrome SxS\\Application\\chrome.exe'
 
             # this option implements Chrome Headless, a new (late 2017)
             # GUI-less browser. chromedriver 2.9 and above required
@@ -528,7 +536,7 @@ class InstaPy:
         for index, location in enumerate(locations):
             self.logger.info('Location [{}/{}]'
                              .format(index + 1, len(locations)))
-            self.logger.info('--> {}'.format(location.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(location.encode('utf-8'))[self.bye_b]))
 
             try:
                 links = get_links_for_location(self.browser,
@@ -555,14 +563,16 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:
                         liked = like_image(self.browser,
                                            user_name,
                                            self.blacklist,
-                                           self.logger)
+                                           self.logger,
+                                           self.logfolder)
 
                         if liked == True:
                             liked_img += 1
@@ -605,7 +615,8 @@ class InstaPy:
                                                            comments,
                                                            self.blacklist,
                                                            self.logger,
-                                                           self.logfolder)
+                                                           self.logfolder,
+                                                           self.bye_b)
                             else:
                                 self.logger.info('--> Not commented')
                                 sleep(1)
@@ -708,7 +719,7 @@ class InstaPy:
         for index, location in enumerate(locations):
             self.logger.info('Location [{}/{}]'
                              .format(index + 1, len(locations)))
-            self.logger.info('--> {}'.format(location.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(location.encode('utf-8'))[self.bye_b]))
 
             try:
                 links = get_links_for_location(self.browser,
@@ -735,7 +746,8 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:
@@ -784,7 +796,8 @@ class InstaPy:
                                                            comments,
                                                            self.blacklist,
                                                            self.logger,
-                                                           self.logfolder)
+                                                           self.logfolder,
+                                                           self.bye_b)
                             else:
                                 self.logger.info('--> Not commented')
                                 sleep(1)
@@ -856,7 +869,7 @@ class InstaPy:
         
         for index, tag in enumerate(tags):
             self.logger.info('Tag [{}/{}]'.format(index + 1, len(tags)))
-            self.logger.info('--> {}'.format(tag.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(tag.encode('utf-8'))[self.bye_b]))
 
             try:
                 links = get_links_for_tag(self.browser,
@@ -868,7 +881,7 @@ class InstaPy:
             except NoSuchElementException:
                 self.logger.error('Too few images, skipping this tag')
                 continue
-
+            
             for i, link in enumerate(links):
                 self.logger.info('[{}/{}]'.format(i + 1, len(links)))
                 self.logger.info(link)
@@ -883,7 +896,8 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:
@@ -954,7 +968,8 @@ class InstaPy:
                                                            comments,
                                                            self.blacklist,
                                                            self.logger,
-                                                           self.logfolder)
+                                                           self.logfolder,
+                                                           self.bye_b)
                             else:
                                 self.logger.info('--> Not commented')
                                 sleep(1)
@@ -1050,7 +1065,7 @@ class InstaPy:
         for index, username in enumerate(usernames):
             self.logger.info(
                 'Username [{}/{}]'.format(index + 1, len(usernames)))
-            self.logger.info('--> {}'.format(username.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(username.encode('utf-8'))[self.bye_b]))
             following = random.randint(0, 100) <= self.follow_percentage
 
             valid_user = validate_username(self.browser,
@@ -1123,7 +1138,8 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:
@@ -1172,7 +1188,8 @@ class InstaPy:
                                                            comments,
                                                            self.blacklist,
                                                            self.logger,
-                                                           self.logfolder)
+                                                           self.logfolder,
+                                                           self.bye_b)
                             else:
                                 self.logger.info('--> Not commented')
                                 sleep(1)
@@ -1226,7 +1243,7 @@ class InstaPy:
         for index, username in enumerate(usernames):
             self.logger.info(
                 'Username [{}/{}]'.format(index + 1, len(usernames)))
-            self.logger.info('--> {}'.format(username.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(username.encode('utf-8'))[self.bye_b]))
 
             try:
                 links = get_links_for_username(self.browser,
@@ -1272,7 +1289,8 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:
@@ -1346,7 +1364,8 @@ class InstaPy:
                                                            comments,
                                                            self.blacklist,
                                                            self.logger,
-                                                           self.logfolder)
+                                                           self.logfolder,
+                                                           self.bye_b)
                             else:
                                 self.logger.info('--> Not commented')
                                 sleep(1)
@@ -1501,7 +1520,8 @@ class InstaPy:
                                                             self.blacklist,
                                                             self.logger,
                                                             self.logfolder,
-                                                            self.follow_times)
+                                                            self.follow_times,
+                                                            self.bye_b)
 
             except (TypeError, RuntimeWarning) as err:
                 if isinstance(err, RuntimeWarning):
@@ -1550,7 +1570,8 @@ class InstaPy:
                                                             self.blacklist,
                                                             self.logger,
                                                             self.logfolder,
-                                                            self.follow_times)
+                                                            self.follow_times,
+                                                            self.bye_b)
 
             except (TypeError, RuntimeWarning) as err:
                 if isinstance(err, RuntimeWarning):
@@ -1602,7 +1623,8 @@ class InstaPy:
                                       sleep_delay,
                                       onlyNotFollowMe,
                                       self.logger,
-                                      self.logfolder)
+                                      self.logfolder,
+                                      self.bye_b)
             self.logger.info(
                 "--> Total people unfollowed : {} ".format(unfollowNumber))
             self.unfollowNumber += unfollowNumber
@@ -1680,7 +1702,8 @@ class InstaPy:
                                            self.username,
                                            self.like_by_followers_upper_limit,
                                            self.like_by_followers_lower_limit,
-                                           self.logger)
+                                           self.logger,
+                                           self.bye_b)
                             )
 
                             if not inappropriate:
@@ -1755,7 +1778,8 @@ class InstaPy:
                                                         comments,
                                                         self.blacklist,
                                                         self.logger,
-                                                        self.logfolder)
+                                                        self.logfolder,
+                                                        self.bye_b)
                                     else:
                                         self.logger.info('--> Not commented')
                                         sleep(1)
@@ -1933,7 +1957,7 @@ class InstaPy:
 
         for index, tag in enumerate(tags):
             self.logger.info('Tag [{}/{}]'.format(index + 1, len(tags)))
-            self.logger.info('--> {}'.format(tag.encode('utf-8')))
+            self.logger.info('--> {}'.format(str(tag.encode('utf-8'))[self.bye_b]))
 
             try:
                 links = get_links_for_tag(self.browser,
@@ -1960,7 +1984,8 @@ class InstaPy:
                                    self.username,
                                    self.like_by_followers_upper_limit,
                                    self.like_by_followers_lower_limit,
-                                   self.logger)
+                                   self.logger,
+                                   self.bye_b)
                     )
 
                     if not inappropriate:

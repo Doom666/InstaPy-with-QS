@@ -64,7 +64,8 @@ def unfollow(browser,
              sleep_delay,
              onlyNotFollowMe,
              logger,
-             logfolder):
+             logfolder,
+             bye_b):
 
     """unfollows the given amount of users"""
     unfollowNum = 0
@@ -138,7 +139,7 @@ def unfollow(browser,
                             follow_button = browser.find_element_by_xpath(
                                 "//*[contains(text(), 'Follow')]")
 
-                            if follow_button.text == 'Follow':
+                            if follow_button.text in ['Follow', 'Follow Back']:
 
                                 unfollowNum += 1
                                 update_activity('unfollows')
@@ -149,7 +150,7 @@ def unfollow(browser,
                                 logger.info(
                                     '--> Ongoing Unfollow From InstaPy {},'
                                     ' now unfollowing: {}'
-                                    .format(str(unfollowNum), person.encode('utf-8')))
+                                    .format(str(unfollowNum), str(person.encode('utf-8'))[bye_b]))
 
                                 sleep(15)
 
@@ -163,16 +164,16 @@ def unfollow(browser,
                     else:
 						# this user found in our list of unfollow but is not followed
                         if follow_button.text != 'Follow':
-                            log_uncertain_unfollowed_pool(username, person, logger)
+                            log_uncertain_unfollowed_pool(username, person, logger, logfolder)
                         delete_line_from_file('{0}{1}_followedPool.csv'.format(logfolder, username),
                                               person + ",\n", logger)
                         # save any unfollowed person
-                        log_record_all_unfollowed(username, person, logger)
+                        log_record_all_unfollowed(username, person, logger, logfolder)
 
                         logger.warning(
                             '--> Cannot Unfollow From InstaPy {}'
                             ', now unfollowing: {}'
-                            .format(str(unfollowNum), person.encode('utf-8')))
+                            .format(str(unfollowNum), str(person.encode('utf-8'))[bye_b]))
                         sleep(2)
 
         except BaseException as e:
@@ -306,7 +307,7 @@ def unfollow(browser,
                         update_activity('unfollows')
                         print('--> Ongoing Unfollow ' + str(unfollowNum) +
                               ', now unfollowing: {}'
-                              .format(person.encode('utf-8')))
+                              .format(str(person.encode('utf-8'))[bye_b]))
                         sleep(15)
                         if hasSlept:
                             hasSlept = False
@@ -382,7 +383,7 @@ def unfollow(browser,
 
                         logger.info(
                             '--> Ongoing Unfollow {}, now unfollowing: {}'
-                            .format(str(unfollowNum), person.encode('utf-8')))
+                            .format(str(unfollowNum), str(person.encode('utf-8'))[bye_b]))
                         sleep(15)
                         # To only sleep once until there is the next unfollow
                         if hasSlept:
@@ -514,6 +515,7 @@ def follow_through_dialog(browser,
                           logger,
                           logfolder,
                           follow_times,
+                          bye_b,
                           callbacks=[]):
     sleep(2)
     person_followed = []
@@ -620,7 +622,7 @@ def follow_through_dialog(browser,
                     follow_restrict[person] = follow_restrict.get(person, 0) + 1
 
                     logger.info('--> Ongoing follow {}, now following: {}'
-                                .format(str(followNum), person.encode('utf-8')))
+                                .format(str(followNum), str(person.encode('utf-8'))[bye_b]))
 
                     if blacklist['enabled'] is True:
                         action = 'followed'
@@ -629,7 +631,7 @@ def follow_through_dialog(browser,
                         )
 
                     for callback in callbacks:
-                        callback(person.encode('utf-8'))
+                        callback(str(person.encode('utf-8'))[bye_b])
                     sleep(15)
 
                     # To only sleep once until there is the next follow
@@ -795,7 +797,8 @@ def follow_given_user_followers(browser,
                                 blacklist,
                                 logger,
                                 logfolder,
-                                follow_times):
+                                follow_times,
+                                bye_b):
 
     browser.get('https://www.instagram.com/' + user_name)
     # update server calls
@@ -831,6 +834,7 @@ def follow_given_user_followers(browser,
                                            logger,
                                            logfolder,
                                            follow_times,
+                                           bye_b,
                                            callbacks=[])
 
     return personFollowed
@@ -847,7 +851,8 @@ def follow_given_user_following(browser,
                                 blacklist,
                                 logger,
                                 logfolder,
-                                follow_times):
+                                follow_times,
+                                bye_b):
 
     browser.get('https://www.instagram.com/' + user_name)
     # update server calls
@@ -882,7 +887,9 @@ def follow_given_user_following(browser,
                                            blacklist,
                                            logger,
                                            logfolder,
-                                           follow_times)
+                                           follow_times,
+                                           bye_b,
+                                           callbacks=[])
 
     return personFollowed
 

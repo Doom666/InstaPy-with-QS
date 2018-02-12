@@ -311,12 +311,12 @@ def quota_supervisor(inspect):
                     if fetched_server_calls_daily >= peak_server_calls_daily:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily', check='server_calls') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily')
-                            print('{} - INFO - Quota Supervisor: daily server calls reached quotient.. (going to sleep {} hours long)\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
+                            print('{} - INFO - Quota Supervisor: daily server calls reached quotient.. (going to sleep {} hours long)\n\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Server calls', interval='daily')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Server calls', interval='daily')
                         else:
-                            print('{} - INFO - QuotaSupervisor: daily server calls reached quotient.. (..exiting)\n~ for *non-stop botting add sleep_after=[\'server_calls\'] arg on the go! ;)'.format(record_time))
+                            print('{} - INFO - QuotaSupervisor: daily server calls reached quotient.. (..exiting)\n\n~ for *non-stop botting add sleep_after=[\'server_calls\'] arg on the go! ;)'.format(record_time))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='exit', job='Server calls', interval='daily')
                             exit()  #if peak_server_calls is fairly not None and sleep_after has no 'server_calls', Quota Supervisor will end up session.
             if peak_server_calls_hourly is not None:
@@ -329,12 +329,12 @@ def quota_supervisor(inspect):
                     if fetched_server_calls_hourly >= peak_server_calls_hourly:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', check='server_calls') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', fetched_time=fetched_raw_time)
-                            print('{} - INFO - Quota Supervisor: hourly server calls reached quotient.. (going to sleep {} minutes long)\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
+                            print('{} - INFO - Quota Supervisor: hourly server calls reached quotient.. (going to sleep {} minutes long)\n\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Server calls', interval='hourly')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Server calls', interval='hourly')
                         else:
-                            print('{} - INFO - QuotaSupervisor: hourly server calls reached quotient.. (..exiting)\n~ for *non-stop botting add sleep_after=[\'server_calls\'] arg on the go! ;)'.format(record_time))
+                            print('{} - INFO - QuotaSupervisor: hourly server calls reached quotient.. (..exiting)\n\n~ for *non-stop botting add sleep_after=[\'server_calls\'] arg on the go! ;)'.format(record_time))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='exit', job='Server calls', interval='hourly')
                             exit() #to prevent quitting after peak values reached, just enable sleep_after=['server_calls'] or just put None to server_calls's peak value(s)
 
@@ -351,7 +351,7 @@ def quota_supervisor(inspect):
                     if fetched_likes_daily >= peak_likes_daily:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily', check='likes') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily')
-                            print('{} - INFO - Quota Supervisor: daily likes reached quotient.. (going to sleep {} hours long)\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
+                            print('{} - INFO - Quota Supervisor: daily likes reached quotient.. (going to sleep {} hours long)\n\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Likes', interval='daily')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Likes', interval='daily')
@@ -368,7 +368,7 @@ def quota_supervisor(inspect):
                     if fetched_likes_hourly >= peak_likes_hourly:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', check='likes') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', fetched_time=fetched_raw_time)
-                            print('{} - INFO - Quota Supervisor: hourly likes reached quotient.. (going to sleep {} minutes long)\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
+                            print('{} - INFO - Quota Supervisor: hourly likes reached quotient.. (going to sleep {} minutes long)\n\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Likes', interval='hourly')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Likes', interval='hourly')
@@ -393,7 +393,7 @@ def quota_supervisor(inspect):
                         if (quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily', check='comments') == True and
                              fetched_comments_daily >= peak_comments_daily):
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily')
-                            print('{} - INFO - Quota Supervisor: daily comments reached quotient.. (going to sleep {} hours long)\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
+                            print('{} - INFO - Quota Supervisor: daily comments reached quotient.. (going to sleep {} hours long)\n\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Comments', interval='daily')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Comments', interval='daily')
@@ -412,7 +412,7 @@ def quota_supervisor(inspect):
                         if (quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', check='comments') == True and
                              fetched_comments_hourly >= peak_comments_hourly):
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', fetched_time=fetched_raw_time)
-                            print('{} - INFO - Quota Supervisor: hourly comments reached quotient.. (going to sleep {} minutes long)\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
+                            print('{} - INFO - Quota Supervisor: hourly comments reached quotient.. (going to sleep {} minutes long)\n\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Comments', interval='hourly')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Comments', interval='hourly')
@@ -433,7 +433,7 @@ def quota_supervisor(inspect):
                     if fetched_follows_daily >= peak_follows_daily:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily', check='follows') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily')
-                            print('{} - INFO - Quota Supervisor: daily follows reached quotient.. (going to sleep {} hours long)\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
+                            print('{} - INFO - Quota Supervisor: daily follows reached quotient.. (going to sleep {} hours long)\n\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Follows', interval='daily')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Follows', interval='daily')
@@ -450,7 +450,7 @@ def quota_supervisor(inspect):
                     if fetched_follows_hourly >= peak_follows_hourly:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', check='follows') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', fetched_time=fetched_raw_time)
-                            print('{} - INFO - Quota Supervisor: hourly follows reached quotient.. (going to sleep {} minutes long)\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
+                            print('{} - INFO - Quota Supervisor: hourly follows reached quotient.. (going to sleep {} minutes long)\n\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Follows', interval='hourly')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Follows', interval='hourly')
@@ -471,7 +471,7 @@ def quota_supervisor(inspect):
                     if fetched_unfollows_daily >= peak_unfollows_daily:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily', check='unfollows') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='daily')
-                            print('{} - INFO - Quota Supervisor: daily unfollows reached quotient.. (going to sleep {} hours long)\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
+                            print('{} - INFO - Quota Supervisor: daily unfollows reached quotient.. (going to sleep {} hours long)\n\n~ time for IstaPy to take a big good nap :-)'.format(record_time, "%.1f" % (forward_sleep_seconds/60/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Unfollows', interval='daily')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Unfollows', interval='daily')
@@ -488,7 +488,7 @@ def quota_supervisor(inspect):
                     if fetched_unfollows_hourly >= peak_unfollows_hourly:
                         if quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', check='likes') == True:
                             forward_sleep_seconds = quota_supervisor_sleeper(protosleep=data['sleep'], interval='hourly', fetched_time=fetched_raw_time)
-                            print('{} - INFO - Quota Supervisor: hourly unfollows reached quotient.. (going to sleep {} minutes long)\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
+                            print('{} - INFO - Quota Supervisor: hourly unfollows reached quotient.. (going to sleep {} minutes long)\n\n~ take a tea break? :>'.format(record_time, "%.0f" % (forward_sleep_seconds/60)))
                             quota_supervisor_notifier(protonotify=data['notify'], alert='sleep', job='Unfollows', interval='hourly')
                             real_sleep (forward_sleep_seconds)
                             quota_supervisor_notifier(protonotify=data['notify'], alert='wake up', job='Unfollows', interval='hourly')

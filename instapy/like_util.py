@@ -193,19 +193,24 @@ def get_links_for_tag(browser,
     total_links = 0
     links = []
     filtered_links = 0
+    try_again = 0
     default_load = 21 if not skip_top_posts else 12   # !mistake change to `if not skip_top_posts`   
     #21 links with top posts (21/3=7 total rows)   #12 (12/3=4 low rows, 3 top rows) links without top posts
+
     while filtered_links < amount:
         if amount >= default_load:  # if amount is less to be fit in a default screen, don't scroll
             if filtered_links >= default_load:   #grab already loaded pics by default
-                for i in range(5):
+                for i in range(3):   #decreased from 5 to 4, cos sometimes so less pics open up
                     browser.execute_script(
                         "window.scrollTo(0, document.body.scrollHeight);")   #scroll 5 times to get fresh a 5*3=15 pic links in it
                     update_activity()
-                    sleep(1)   #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
+                    sleep(1.5)   #if not slept, and internet speed is low, instagram will only scroll one time, instead of many times you sent scoll command...
         link_elems = main_elem.find_elements_by_tag_name('a')
-        total_links =+ len(link_elems)
-
+        if not link_elems:   #this tag does not have `Top Posts` or it really is empty..
+            main_elem2 = browser.find_element_by_xpath('//main/article/div[1]')
+            link_elems = main_elem2.find_elements_by_tag_name('a')
+        total_links += len(link_elems)
+        
         try:
             if link_elems:
                 new_links = [link_elem.get_attribute('href') for link_elem in link_elems
@@ -213,11 +218,15 @@ def get_links_for_tag(browser,
                 for new_link in new_links:
                     links.append(new_link)
                 links =  list(set(links))   #delete duplicated links
+                
                 if len(links) == filtered_links:
-                    logger.info("This tag has less pictures than intended..")
-                    break
+                    try_again += 1
+                    if try_again > 1 :
+                        logger.info("This tag has less pictures than intended..")
+                        break
                 else:
-                    filtered_links =+ len(links)
+                    filtered_links = len(links)
+                    try_again = 0
                 if filtered_links < default_load and amount > filtered_links:
                     logger.info("This tag has so less pictures than expected...")
                     break
@@ -229,6 +238,7 @@ def get_links_for_tag(browser,
             logger.error("link_elems error {}".format(str(e)))
             break
 
+            
     while (filtered_links < amount) and not abort:
         amount_left = amount - filtered_links
         # Average items of the right media per page loaded
@@ -402,7 +412,8 @@ def check_link(browser,
                username,
                like_by_followers_upper_limit,
                like_by_followers_lower_limit,
-               logger):
+               logger,
+               bye_b):
 
     browser.get(link)
     # update server calls
@@ -424,7 +435,7 @@ def check_link(browser,
             post_page = None
     
     if post_page is None:
-        logger.warning('Unavailable Page: {}'.format(link.encode('utf-8')))
+        logger.warning('Unavailable Page: {}'.format(str(link.encode('utf-8'))[bye_b]))
         return True, None, None, 'Unavailable Page'
 
     """Gets the description of the link and checks for the dont_like tags"""
@@ -479,7 +490,7 @@ def check_link(browser,
     if image_text is None:
         image_text = "No description"
 
-    logger.info('Image from: {}'.format(user_name.encode('utf-8')))
+    logger.info('Image from: {}'.format(str(user_name.encode('utf-8'))[bye_b]))
 
     """Find the number of followes the user has"""
     if like_by_followers_upper_limit or like_by_followers_lower_limit:
@@ -518,8 +529,8 @@ def check_link(browser,
                 return True, user_name, is_video, \
                     'Number of followers does not reach minimum'
 
-    logger.info('Link: {}'.format(link.encode('utf-8')))
-    logger.info('Description: {}'.format(image_text.encode('utf-8')))
+    logger.info('Link: {}'.format(str(link.encode('utf-8'))[bye_b]))
+    logger.info('Description: {}'.format(str(image_text.encode('utf-8'))[bye_b]))
 
     """Check if the user_name is in the ignore_users list"""
     if (user_name in ignore_users) or (user_name == username):
@@ -549,8 +560,8 @@ def check_link(browser,
                      (re.split(r'\W+', dont_likes_regex))[1] if dont_likes_regex.endswith('+([^\\d\\w]|$)') else   # '[word'
                       (re.split(r'\W+', dont_likes_regex))[3] if dont_likes_regex.startswith('#[\\d\\w]+') else     # ']word'
                        (re.split(r'\W+', dont_likes_regex))[1])                                                    # '#word'
-            inapp_unit = ('Inappropriate! ~ contains \'{}\''.format(quashed.encode('utf-8')) if quashed == iffy else
-                              'Inappropriate! ~ contains \'{}\' in \'{}\''.format(iffy.encode('utf-8'), quashed.encode('utf-8')))
+            inapp_unit = ('Inappropriate! ~ contains \'{}\''.format(str(quashed.encode('utf-8'))[bye_b]) if quashed == iffy else
+                              'Inappropriate! ~ contains \'{}\' in \'{}\''.format(str(iffy.encode('utf-8'))[bye_b], str(quashed.encode('utf-8'))[bye_b]))
             return True, user_name, is_video, inapp_unit
 
     return False, user_name, is_video, 'None'

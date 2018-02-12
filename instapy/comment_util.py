@@ -36,7 +36,7 @@ def open_comment_section(browser):
         print(missing_comment_elem_warning)
 
 
-def comment_image(browser, username, comments, blacklist, logger, logfolder):
+def comment_image(browser, username, comments, blacklist, logger, logfolder, bye_b):
     """Checks if it should comment on the image"""
     if quota_supervisor('comments') == 'jump':
         update_activity('jumps')
@@ -66,7 +66,7 @@ def comment_image(browser, username, comments, blacklist, logger, logfolder):
                 add_user_to_blacklist(
                     browser, username, blacklist['campaign'], action, logger, logfolder
                 )
-            logger.info("--> Commented: {}".format(rand_comment.encode('utf-8')))
+            logger.info("--> Commented: {}".format(str(rand_comment.encode('utf-8'))[bye_b]))
         else:
             logger.warning('--> Warning: Comment Action Likely Failed:'
                            ' Comment Element not found')
