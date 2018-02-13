@@ -356,6 +356,9 @@ def get_links_for_username(browser,
     main_elem = browser.find_element_by_tag_name('main')
     link_elems = main_elem.find_elements_by_tag_name('a')
     total_links = len(link_elems)
+    # Check there is at least one link 
+    if total_links == 0: 
+        return False
     links = []
     filtered_links = 0
     try:
@@ -373,7 +376,7 @@ def get_links_for_username(browser,
 
     while (filtered_links < amount) and not abort:
         amount_left = amount - filtered_links
-        # Average items of the right media per page loaded
+        # Average items of the right media per page loaded (total links checked for not zero)
         new_per_page = ceil(12 * filtered_links / total_links)
         if new_per_page == 0:
             # Avoid division by zero
@@ -567,8 +570,8 @@ def check_link(browser,
                      (re.split(r'\W+', dont_likes_regex))[1] if dont_likes_regex.endswith('+([^\\d\\w]|$)') else   # '[word'
                       (re.split(r'\W+', dont_likes_regex))[3] if dont_likes_regex.startswith('#[\\d\\w]+') else     # ']word'
                        (re.split(r'\W+', dont_likes_regex))[1])                                                    # '#word'
-            inapp_unit = ('Inappropriate! ~ contains \'{}\''.format(str(quashed.encode('utf-8'))[bye_b]) if quashed == iffy else
-                              'Inappropriate! ~ contains \'{}\' in \'{}\''.format(str(iffy.encode('utf-8'))[bye_b], str(quashed.encode('utf-8'))[bye_b]))
+            inapp_unit = ('Inappropriate! ~ contains \'{}\''.format(quashed) if quashed == iffy else
+                              'Inappropriate! ~ contains \'{}\' in \'{}\''.format(iffy, quashed))
             return True, user_name, is_video, inapp_unit
 
     return False, user_name, is_video, 'None'

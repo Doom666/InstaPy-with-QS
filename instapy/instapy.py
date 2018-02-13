@@ -679,7 +679,7 @@ class InstaPy:
 
                     else:
                         self.logger.info(
-                            '--> Image not liked: {}'.format(reason))
+                            '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
@@ -824,7 +824,7 @@ class InstaPy:
                             already_liked += 1
                     else:
                         self.logger.info(
-                            '--> Image not liked: {}'.format(reason))
+                            '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
@@ -1031,7 +1031,7 @@ class InstaPy:
 
                     else:
                         self.logger.info(
-                            '--> Image not liked: {}'.format(reason))
+                            '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
@@ -1201,7 +1201,7 @@ class InstaPy:
 
                     else:
                         self.logger.info(
-                            '--> Image not liked: {}'.format(reason))
+                            '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
@@ -1376,7 +1376,7 @@ class InstaPy:
 
                     else:
                         self.logger.info(
-                            '--> Image not liked: {}'.format(reason))
+                            '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.info('Invalid Page: {}'.format(err))
@@ -1858,7 +1858,7 @@ class InstaPy:
 
                             else:
                                 self.logger.info(
-                                    '--> Image not liked: {}'.format(reason))
+                                    '--> Image not liked: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                                 inap_img += 1
                                 if reason == 'Inappropriate' and unfollow:
                                     unfollow_user(self.browser, self.logger)
@@ -1998,7 +1998,7 @@ class InstaPy:
                                                         self.logfolder)
                     else:
                         self.logger.info(
-                            '--> User not followed: {}'.format(reason))
+                            '--> User not followed: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))

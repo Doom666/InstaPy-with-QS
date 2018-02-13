@@ -163,7 +163,7 @@ def unfollow(browser,
                                 break
                     else:
 						# this user found in our list of unfollow but is not followed
-                        if follow_button.text != 'Follow':
+                        if follow_button.text not in ['Follow', 'Follow Back']:
                             log_uncertain_unfollowed_pool(username, person, logger, logfolder)
                         delete_line_from_file('{0}{1}_followedPool.csv'.format(logfolder, username),
                                               person + ",\n", logger)
