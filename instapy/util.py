@@ -131,19 +131,41 @@ def get_active_users(browser, username, posts, logger):
 
     active_users = []
 
+    print("Getting likers of last {} posts:".format(posts))
     # posts argument is the number of posts to collect usernames
     for count in range(0, posts):
         try:
             likes_count = formatNumber(browser.find_element_by_xpath(
-                "//a[contains(@class, '_nzn1h')]/span").text)/4*2
+                "//a[contains(@class, '_nzn1h')]/span").text)
             browser.find_element_by_xpath(
                 "//a[contains(@class, '_nzn1h')]").click()
+            sleep(4)
             dialog = browser.find_element_by_xpath(
                 "//div[text()='Likes']/following-sibling::div")
-            scroll_bottom(browser, dialog, likes_count)
-            sleep(1)
+            scroll_it = True
+
+            while scroll_it != False:
+                scroll_it = browser.execute_script('''
+                    var div = arguments[0];
+                    if (div.offsetHeight + div.scrollTop < div.scrollHeight) {
+                        div.scrollTop = div.scrollHeight;
+                        return true;}
+                    else if (div.offsetHeight + div.scrollTop >= div.scrollHeight) {
+                        return false;}
+                    else {
+                        return null;}
+                    ''', dialog)
+
+                if scroll_it is None:
+                    print ("Too Many Requests!\n\n~sleeping a bit")
+                    sleep(427)
+                else:
+                    sleep(5.6)
+            
             tmp_list = browser.find_elements_by_xpath(
                 "//a[contains(@class, '_2g7d5')]")
+            print("Post {}  |  Likers: {} found, {} catched".format(count+1, likes_count, len(tmp_list)))
+
         except NoSuchElementException:
             try:
                 tmp_list = browser.find_elements_by_xpath(
@@ -168,6 +190,7 @@ def get_active_users(browser, username, posts, logger):
 
     # delete duplicated users
     active_users = list(set(active_users))
+    print("Totally gathered {} unique active followers from last {} posts".format(len(active_users), posts))
 
     return active_users
 

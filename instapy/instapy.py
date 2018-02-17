@@ -4,10 +4,10 @@ import json
 import logging
 from math import ceil
 import os
+from platform import python_version
 from datetime import datetime
 import time
 from sys import maxsize
-import platform
 import random
 
 from pyvirtualdisplay import Display
@@ -150,7 +150,7 @@ class InstaPy:
                          'We\'re working to fix this soon!')
             self.logger.warning(error_msg)
         
-        if platform.python_version().startswith('3'):
+        if python_version().startswith('3'):
             self.bye_b = slice(2, -1)   #equialent to 'somewords'[2:-1]
         else:
             self.bye_b = slice(None, None)   #equialent to 'somewords'[:]
@@ -223,6 +223,8 @@ class InstaPy:
             chrome_options.add_argument('--disable-setuid-sandbox')
             
             #chrome_options.binary_location = 'C:\\Users\\shahr\\AppData\\Local\\Google\\Chrome SxS\\Application\\chrome.exe'
+            #chrome_options.add_argument('--disable-smooth-scrolling')
+            #chrome_options.add_argument('--window-size=5000, 5000')
 
             # this option implements Chrome Headless, a new (late 2017)
             # GUI-less browser. chromedriver 2.9 and above required
@@ -1606,7 +1608,13 @@ class InstaPy:
                        onlyNotFollowMe=False,
                        unfollow_after=None):
         """Unfollows (default) 10 users from your following list"""
-        if onlyInstapyFollowed == True:
+
+        if unfollow_after is not None:
+            if not python_version().startswith(('2.7', '3')):
+                self.logger.info("`unfollow_after` argument is not available for Python versions below 2.7")
+                unfollow_after = None
+        
+        if onlyInstapyFollowed:
             self.automatedFollowedPool = set_automated_followed_pool(self.username,
                                                                      self.logger,
                                                                      self.logfolder,
@@ -1684,7 +1692,8 @@ class InstaPy:
                 else:
                     if link in history:
                         self.logger.info('This link has already '
-                                         'been visited:\n', link, '\n')
+                                         'been visited: {}'
+                                         .format(link))
                     else:
                         self.logger.info('New link found...')
                         history.append(link)
