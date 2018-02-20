@@ -175,8 +175,7 @@ def get_links_for_tag(browser,
         # Make it an array to use it in the following part
         media = [media]
 
-    browser.get('https://www.instagram.com/explore/tags/'
-                + (tag[1:] if tag[:1] == '#' else tag))
+    browser.get('https://www.instagram.com/explore/tags/{}'.format(tag[1:] if tag[:1] == '#' else tag))
     # update server calls
     update_activity()
     sleep(2)

@@ -1063,6 +1063,8 @@ class InstaPy:
         commented = 0
         followed = 0
         usernames = usernames or []
+        upper_follower_limit = None
+        lower_follower_limit = None
 
         for index, username in enumerate(usernames):
             self.logger.info(
@@ -1074,8 +1076,8 @@ class InstaPy:
                                            username,
                                            self.ignore_users,
                                            self.blacklist,
-                                           self.like_by_followers_upper_limit,
-                                           self.like_by_followers_lower_limit)
+                                           upper_follower_limit,
+                                           lower_follower_limit)
             if valid_user is not True:
                 self.logger.info(valid_user)
                 continue
@@ -1138,8 +1140,8 @@ class InstaPy:
                                    self.ignore_if_contains,
                                    self.ignore_users,
                                    self.username,
-                                   self.like_by_followers_upper_limit,
-                                   self.like_by_followers_lower_limit,
+                                   upper_follower_limit,
+                                   lower_follower_limit,
                                    self.logger,
                                    self.bye_b)
                     )
@@ -1239,6 +1241,8 @@ class InstaPy:
         inap_img = 0
         commented = 0
         followed = 0
+        upper_follower_limit = None
+        lower_follower_limit = None
 
         usernames = usernames or []
 
@@ -1289,8 +1293,8 @@ class InstaPy:
                                    self.ignore_if_contains,
                                    self.ignore_users,
                                    self.username,
-                                   self.like_by_followers_upper_limit,
-                                   self.like_by_followers_lower_limit,
+                                   upper_follower_limit,
+                                   lower_follower_limit,
                                    self.logger,
                                    self.bye_b)
                     )
@@ -1547,6 +1551,8 @@ class InstaPy:
                                self.user_interact_random,
                                self.user_interact_media)
 
+        self.followed += len(userFollowed)
+                               
         return self
 
     def follow_user_following(self,
@@ -1598,6 +1604,8 @@ class InstaPy:
                                self.user_interact_random,
                                self.user_interact_media)
 
+        self.followed += len(userFollowed)
+                               
         return self
 
     def unfollow_users(self,
@@ -1963,6 +1971,9 @@ class InstaPy:
         tags = [tag.strip() for tag in tags]
 
         tags = tags or []
+        
+        time_break = random.randint(7, 14)
+        follow_counter = 0
 
         for index, tag in enumerate(tags):
             self.logger.info('Tag [{}/{}]'.format(index + 1, len(tags)))
@@ -2009,6 +2020,18 @@ class InstaPy:
                         self.logger.info(
                             '--> User not followed: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
+                    
+                    follow_counter = followed if followed>follow_counter else follow_counter
+                    if (followed != 0 and
+                          follow_counter==followed and
+                            followed % time_break == 0) :
+                        follow_counter += 1
+                        time_break = random.randint(7, 14)   #reset time break value
+                        nap = random.randint(427, 600)
+                        self.logger.info("I've followed {} users, gonna sleep some {} minutes".format(followed, ceil(nap/60)))
+                        sleep (nap)
+
+                    
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
 
