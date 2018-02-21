@@ -37,7 +37,6 @@ def log_followed_pool(login, followed, logger, logfolder, logtime):
     except BaseException as e:
         logger.error("log_followed_pool error {}".format(str(e)))
 
-        
     # We save all followed to a pool that will never be erase
     log_record_all_followed(login, followed, logger, logfolder)
 

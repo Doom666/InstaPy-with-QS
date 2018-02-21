@@ -238,7 +238,7 @@ def get_links_for_tag(browser,
             logger.info("Insufficient amount of links ~ trying again: {}".format(try_again))
             sleep(3)
             if try_again > 2:   #you can try again as much as you want by changing this number
-                logger.info("\n'{}' tag POSSIBLY has less images than desired...".format(tag[1:] if tag[:1] == '#' else tag))
+                logger.info("'{}' tag POSSIBLY has less images than desired...".format(tag[1:] if tag[:1] == '#' else tag))
                 break
         else:
             filtered_links = len(links)
@@ -610,17 +610,17 @@ def get_tags(browser, url):
 
 
 def get_links(browser, tag, logger, media, element):
-        # Get image links in scope from tags
-        link_elems = element.find_elements_by_tag_name('a')
-        sleep(2)
-        links = []
-        try:
-            if link_elems:
-                new_links = [link_elem.get_attribute('href') for link_elem in link_elems
-                         if link_elem and link_elem.text in media]
-                links.extend(new_links)
-            else:
-                logger.info("'{}' tag does not contain a picture".format(tag[1:] if tag[:1] == '#' else tag))
-        except BaseException as e:
-            logger.error("link_elems error {}".format(str(e)))
-        return links
+    # Get image links in scope from tags
+    link_elems = element.find_elements_by_tag_name('a')
+    sleep(2)
+    links = []
+    try:
+        if link_elems:
+            new_links = [link_elem.get_attribute('href') for link_elem in link_elems
+                     if link_elem and link_elem.text in media]
+            links.extend(new_links)
+        else:
+            logger.info("'{}' tag does not contain a picture".format(tag[1:] if tag[:1] == '#' else tag))
+    except BaseException as e:
+        logger.error("link_elems error {}".format(str(e)))
+    return links
