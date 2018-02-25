@@ -21,7 +21,7 @@ from subprocess import call as duplicate_it
 
 #if os.name == 'nt':
 from .clarifai_util import check_image
-from .settings import Settings 
+from .settings import Settings
 from .comment_util import comment_image
 from .like_util import check_link
 from .like_util import get_links_for_tag
@@ -100,13 +100,13 @@ class InstaPy:
         self.video_comments = []
 
         self.followed = 0
-        self.liked_img = 0 
-        self.already_liked = 0 
-        self.inap_img = 0 
-        self.commented = 0 
-        self.followed_by = 0 
+        self.liked_img = 0
+        self.already_liked = 0
+        self.inap_img = 0
+        self.commented = 0
+        self.followed_by = 0
         self.unfollowNumber = 0
-        
+
         self.follow_restrict = load_follow_restriction(self.logfolder)
         self.follow_times = 1
         self.do_follow = False
@@ -149,7 +149,7 @@ class InstaPy:
             error_msg = ('Sorry, Record Activity is not working on Windows. '
                          'We\'re working to fix this soon!')
             self.logger.warning(error_msg)
-        
+
         if python_version().startswith('3'):
             self.bye_b = slice(2, -1)   #equialent to 'somewords'[2:-1]
         else:
@@ -215,13 +215,13 @@ class InstaPy:
             self.browser = webdriver.Firefox(firefox_profile=firefox_profile)
 
         else:
-            chromedriver_location = Settings.browser_location 
+            chromedriver_location = Settings.browser_location
             chrome_options = Options()
             chrome_options.add_argument('--dns-prefetch-disable')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--lang=en-US')
             chrome_options.add_argument('--disable-setuid-sandbox')
-            
+
             #chrome_options.binary_location = 'C:\\Users\\shahr\\AppData\\Local\\Google\\Chrome SxS\\Application\\chrome.exe'
             #chrome_options.add_argument('--disable-smooth-scrolling')
             #chrome_options.add_argument('--window-size=5000, 5000')
@@ -693,14 +693,14 @@ class InstaPy:
         self.logger.info('Followed: {}'.format(followed))
 
         self.followed += followed
-        self.liked_img += liked_img 
-        self.already_liked += already_liked 
-        self.inap_img += inap_img 
+        self.liked_img += liked_img
+        self.already_liked += already_liked
+        self.inap_img += inap_img
         self.commented += commented
 
         return self
-        
-        
+
+
     def comment_by_locations(self,
                       locations=None,
                       amount=50,
@@ -868,7 +868,7 @@ class InstaPy:
         tags = [tag.strip() for tag in tags]
 
         tags = tags or []
-        
+
         for index, tag in enumerate(tags):
             self.logger.info('Tag [{}/{}]'.format(index + 1, len(tags)))
             self.logger.info('--> {}'.format(str(tag.encode('utf-8'))[self.bye_b]))
@@ -883,11 +883,11 @@ class InstaPy:
             except NoSuchElementException:
                 self.logger.error('Too few images, skipping this tag')
                 continue
-            
+
             for i, link in enumerate(links):
                 self.logger.info('[{}/{}]'.format(i + 1, len(links)))
                 self.logger.info(link)
-                
+
                 try:
                     inappropriate, user_name, is_video, reason = (
                         check_link(self.browser,
@@ -1045,9 +1045,9 @@ class InstaPy:
         self.logger.info('Followed: {}'.format(followed))
 
         self.followed += followed
-        self.liked_img += liked_img 
-        self.already_liked += already_liked 
-        self.inap_img += inap_img 
+        self.liked_img += liked_img
+        self.already_liked += already_liked
+        self.inap_img += inap_img
         self.commented += commented
 
         return self
@@ -1220,11 +1220,11 @@ class InstaPy:
         self.logger.info('Inappropriate: {}'.format(inap_img))
         self.logger.info('Commented: {}'.format(commented))
 
-        self.liked_img += liked_img 
-        self.already_liked += already_liked 
-        self.inap_img += inap_img 
+        self.liked_img += liked_img
+        self.already_liked += already_liked
+        self.inap_img += inap_img
         self.commented += commented
-        
+
         return self
 
     def interact_by_users(self,
@@ -1401,7 +1401,7 @@ class InstaPy:
         self.already_liked += already_liked
         self.inap_img += inap_img
         self.commented += commented
-        
+
         return self
 
     def like_from_image(self, url, amount=50, media=None):
@@ -1552,7 +1552,7 @@ class InstaPy:
                                self.user_interact_media)
 
         self.followed += len(userFollowed)
-                               
+
         return self
 
     def follow_user_following(self,
@@ -1605,7 +1605,7 @@ class InstaPy:
                                self.user_interact_media)
 
         self.followed += len(userFollowed)
-                               
+
         return self
 
     def unfollow_users(self,
@@ -1621,7 +1621,7 @@ class InstaPy:
             if not python_version().startswith(('2.7', '3')):
                 self.logger.info("`unfollow_after` argument is not available for Python versions below 2.7")
                 unfollow_after = None
-        
+
         if onlyInstapyFollowed:
             self.automatedFollowedPool = set_automated_followed_pool(self.username,
                                                                      self.logger,
@@ -1971,7 +1971,7 @@ class InstaPy:
         tags = [tag.strip() for tag in tags]
 
         tags = tags or []
-        
+
         time_break = random.randint(7, 14)
         follow_counter = 0
 
@@ -2020,7 +2020,7 @@ class InstaPy:
                         self.logger.info(
                             '--> User not followed: {}'.format(str(reason.encode('utf-8'))[self.bye_b]))
                         inap_img += 1
-                    
+
                     follow_counter = followed if followed>follow_counter else follow_counter
                     if (followed != 0 and
                           follow_counter==followed and
@@ -2031,7 +2031,7 @@ class InstaPy:
                         self.logger.info("I've followed {} users, gonna sleep some {} minutes".format(followed, ceil(nap/60)))
                         sleep (nap)
 
-                    
+
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
 
@@ -2068,7 +2068,7 @@ class InstaPy:
                 duplicate_it('{} {} {}'.format(copy_command, cur_DB, owner_DB), shell=True)
                 new_user = True
             Settings.database_location = owner_DB
-        
+
         conn = sqlite3.connect(Settings.database_location)
         with conn:
             conn.row_factory = sqlite3.Row
@@ -2078,7 +2078,7 @@ class InstaPy:
                 cur.execute("DELETE FROM statistics WHERE ROWID IN (SELECT ROWID FROM statistics ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
                 cur.execute("DELETE FROM QuotaPeaks WHERE ROWID IN (SELECT ROWID FROM QuotaPeaks ORDER BY ROWID DESC LIMIT -1 OFFSET 0)")
                 conn.commit()
-            
+
             supervising_state = None
             tact_cycle = 1
             record_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

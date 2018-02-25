@@ -211,6 +211,7 @@ def get_links_for_tag(browser,
     try_again = 0
     sc_rolled = 0
     nap = 1.5
+    put_sleep = 0
     while filtered_links in range(1, amount):
         if sc_rolled > 100:
             logger.info("Scrolled too much! ~ sleeping a bit :>")
@@ -238,8 +239,17 @@ def get_links_for_tag(browser,
             logger.info("Insufficient amount of links ~ trying again: {}".format(try_again))
             sleep(3)
             if try_again > 2:   #you can try again as much as you want by changing this number
-                logger.info("'{}' tag POSSIBLY has less images than desired...".format(tag[1:] if tag[:1] == '#' else tag))
-                break
+                if put_sleep < 1:
+                    if filtered_links <= 21 :
+                        logger.info("Cor! Did you send too many requests? ~ let's rest some")
+                        sleep(600)
+                        put_sleep += 1
+                        browser.execute_script("location.reload()")
+                        try_again = 0
+                        sleep(3)
+                else:
+                    logger.info("'{}' tag POSSIBLY has less images than desired...".format(tag[1:] if tag[:1] == '#' else tag))
+                    break
         else:
             filtered_links = len(links)
             try_again = 0

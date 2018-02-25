@@ -113,11 +113,11 @@ def unfollow(browser,
                 if unfollowNum != 0 and \
                    hasSlept is False and \
                    unfollowNum % 10 == 0:
-                        logger.warning('sleeping for about {}min'
+                        logger.info('sleeping for about {}min'
                                        .format(int(sleep_delay/60)))
                         sleep(sleep_delay)
                         hasSlept = True
-                        continue
+                        pass
 
                 if person not in dont_include:
                     browser.get('https://www.instagram.com/' + person)
@@ -369,7 +369,7 @@ def unfollow(browser,
                                     .format(int(sleep_delay/60)))
                         sleep(sleep_delay)
                         hasSlept = True
-                        continue
+                        pass
 
                 if person not in dont_include:
                     if quota_supervisor('unfollows') == 'jump':
@@ -697,11 +697,28 @@ def get_given_user_followers(browser,
     follow_buttons = dialog.find_elements_by_xpath(
         "//div/div/span/button[text()='Follow']")
     person_list = []
-
-    if amount >= len(follow_buttons):
-        amount = len(follow_buttons)
-        logger.warning("{} -> Less users to follow than requested."
+    
+    counted_buttons = len(follow_buttons)
+    try_again = 0
+    if amount > allfollowing:
+        amount = allfollowing
+        logger.info(("{} -> Less users to follow than requested."
+                   .format(user_name))
+    while amount > len(follow_buttons):
+        scroll_bottom(browser, dialog, 6)
+        follow_buttons = dialog.find_elements_by_xpath(
+            "//div/div/span/button[text()='Follow']")
+        sleep(3)
+        if counted_buttons == len(follow_buttons):
+            try_again += 1
+            if try_again > 2:
+                amount = len(follow_buttons)
+                logger.info("{} -> Failed to load desired amount of users."
                        .format(user_name))
+                break
+        else:
+            counted_buttons = len(follow_buttons)
+            try_again = 0
 
     finalBtnPerson = []
     if randomize:
